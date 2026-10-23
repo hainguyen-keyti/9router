@@ -123,6 +123,16 @@ async function handleSingleModel(body, modelStr, kind, responseFormat) {
     // Upstream 400 (e.g. a prompt ElevenLabs rejects) is the same for every account — don't burn the pool.
     if (result.status === HTTP_STATUS.BAD_REQUEST) return result.response;
 
+    // 402: this account's plan doesn't include the feature (e.g. ElevenLabs Music on free tier).
+    // Try another account for this request, but don't cool this one down — waiting won't change
+    // the plan, and a later request should still reach it once the plan is upgraded.
+    if (result.status === HTTP_STATUS.PAYMENT_REQUIRED) {
+      excludeConnectionIds.add(credentials.connectionId);
+      lastError = result.error;
+      lastStatus = result.status;
+      continue;
+    }
+
     const { shouldFallback } = await markAccountUnavailable(credentials.connectionId, result.status, result.error, provider, model);
     if (shouldFallback) {
       excludeConnectionIds.add(credentials.connectionId);
