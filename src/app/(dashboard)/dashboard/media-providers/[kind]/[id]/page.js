@@ -180,6 +180,8 @@ export default function MediaProviderDetailPage() {
               : kind === "stt" ? provider.sttConfig
               : kind === "embedding" ? provider.embeddingConfig
               : kind === "systemone" ? provider.systemoneConfig
+              : kind === "music" ? provider.musicConfig
+              : kind === "sfx" ? provider.sfxConfig
               : provider.searchConfig || { mode: "chat-completions", defaultModel: provider.searchViaChat?.defaultModel, pricingUrl: provider.searchViaChat?.pricingUrl, freeTier: provider.searchViaChat?.freeTier }
           }
           provider={provider}

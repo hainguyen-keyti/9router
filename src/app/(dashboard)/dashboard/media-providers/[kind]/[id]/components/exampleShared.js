@@ -71,7 +71,25 @@ export const KIND_EXAMPLE_CONFIG = {
     inputPlaceholder: "A calm piano melody",
     defaultInput: "A calm piano melody",
     bodyKey: "prompt",
-    defaultResponse: `{\n  "data": [\n    { "url": "...", "format": "mp3" }\n  ]\n}`,
+    defaultResponse: `<binary audio/mpeg>\n\n?response_format=json →\n{ "audio": "<base64>", "format": "mp3" }`,
+    extraFields: [
+      { key: "music_length_ms", label: "Length (ms)", type: "number", default: 10000, min: 3000, max: 600000 },
+      { key: "force_instrumental", label: "Instrumental", type: "select", default: "", options: ["", "true", "false"] },
+      { key: "output_format", label: "Codec", type: "select", default: "mp3_44100_128", options: ["mp3_44100_128", "mp3_44100_192", "mp3_22050_32", "opus_48000_128", "pcm_44100"] },
+    ],
+  },
+  sfx: {
+    inputLabel: "Prompt",
+    inputPlaceholder: "Cinematic laser blast with echoing reverb",
+    defaultInput: "Cinematic laser blast with echoing reverb",
+    bodyKey: "prompt",
+    defaultResponse: `<binary audio/mpeg>\n\n?response_format=json →\n{ "audio": "<base64>", "format": "mp3" }`,
+    extraFields: [
+      { key: "duration_seconds", label: "Duration (s)", type: "number", default: "", min: 0.5, max: 30 },
+      { key: "prompt_influence", label: "Influence", type: "number", default: "", min: 0, max: 1 },
+      { key: "loop", label: "Loop", type: "select", default: "", options: ["", "true", "false"] },
+      { key: "output_format", label: "Codec", type: "select", default: "mp3_44100_128", options: ["mp3_44100_128", "mp3_44100_192", "mp3_22050_32", "opus_48000_128", "pcm_44100"] },
+    ],
   },
   systemone: {
     inputLabel: "State",

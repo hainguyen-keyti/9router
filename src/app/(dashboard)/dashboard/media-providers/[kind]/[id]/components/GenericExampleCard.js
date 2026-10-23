@@ -45,7 +45,9 @@ export function GenericExampleCard({ providerId, kind }) {
   // Get models for this kind (e.g., type="image")
   const kindModels = getModelsByProviderId(providerId).filter((m) => getModelKind(m) === kind);
   // Kinds that need a model identifier in the request (image/video/music/systemone)
-  const KIND_NEEDS_MODEL = new Set(["image", "video", "music", "imageToText", "systemone"]);
+  const KIND_NEEDS_MODEL = new Set(["image", "video", "music", "sfx", "imageToText", "systemone"]);
+  // Kinds whose endpoint answers with binary audio (played inline below)
+  const isAudioKind = kind === "music" || kind === "sfx";
   const needsModel = KIND_NEEDS_MODEL.has(kind);
   const allowManualModel = needsModel && kindModels.length === 0;
   const [selectedModel, setSelectedModel] = useState(kindModels[0]?.id ?? "");
@@ -69,6 +71,7 @@ export function GenericExampleCard({ providerId, kind }) {
   const [partialImage, setPartialImage] = useState(null);
   const [imageOutputFormat, setImageOutputFormat] = useState("json"); // json | binary
   const [binaryImageUrl, setBinaryImageUrl] = useState("");
+  const [binaryAudioUrl, setBinaryAudioUrl] = useState("");
   const [running, setRunning] = useState(false);
   const [error, setError] = useState("");
   const [connections, setConnections] = useState([]);
@@ -143,7 +146,7 @@ export function GenericExampleCard({ providerId, kind }) {
   const headersPreview = `-H "Content-Type: application/json" \\\n  -H "Authorization: Bearer ${apiKey || "YOUR_KEY"}"${pinnedConnectionId ? ` \\\n  -H "x-connection-id: ${pinnedConnectionId}"` : ""}${useStreaming ? ` \\\n  -H "Accept: text/event-stream"` : ""}`;
   const curlSnippet = `curl -X ${kindConfig.endpoint.method} ${endpoint}${apiPathWithQuery} \\
   ${headersPreview.replace(/\\\n  /g, "\\\n  ")} \\
-  -d '${JSON.stringify(requestBody)}'${wantBinary ? " \\\n  --output image.png" : ""}`;
+  -d '${JSON.stringify(requestBody)}'${wantBinary ? " \\\n  --output image.png" : ""}${isAudioKind ? " \\\n  --output out.mp3" : ""}`;
 
   const handleRun = async () => {
     if (!input.trim() || !modelFull) return;
@@ -153,6 +156,7 @@ export function GenericExampleCard({ providerId, kind }) {
     setProgress(null);
     setPartialImage(null);
     if (binaryImageUrl) { try { URL.revokeObjectURL(binaryImageUrl); } catch {} setBinaryImageUrl(""); }
+    if (binaryAudioUrl) { try { URL.revokeObjectURL(binaryAudioUrl); } catch {} setBinaryAudioUrl(""); }
     const start = Date.now();
     try {
       const headers = { "Content-Type": "application/json" };
@@ -176,6 +180,13 @@ export function GenericExampleCard({ providerId, kind }) {
         const blob = await res.blob();
         const objUrl = URL.createObjectURL(blob);
         setBinaryImageUrl(objUrl);
+        setResult({ data: { binary: true, mime: ctype, size: blob.size }, latencyMs: Date.now() - start });
+        return;
+      }
+      // Binary audio response (music / sound effects) — play inline
+      if (ctype.startsWith("audio/")) {
+        const blob = await res.blob();
+        setBinaryAudioUrl(URL.createObjectURL(blob));
         setResult({ data: { binary: true, mime: ctype, size: blob.size }, latencyMs: Date.now() - start });
         return;
       }
@@ -558,6 +569,21 @@ export function GenericExampleCard({ providerId, kind }) {
           <pre className="bg-sidebar rounded-lg px-3 py-2.5 text-xs font-mono text-text-main overflow-x-auto whitespace-pre-wrap break-all opacity-70">
             {result ? resultJson : exConfig.defaultResponse}
           </pre>
+          {isAudioKind && binaryAudioUrl && (
+            <div className="mt-2 flex flex-col gap-1.5">
+              <div className="flex items-center justify-end">
+                <a
+                  href={binaryAudioUrl}
+                  download="out.mp3"
+                  className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-primary transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[14px]">download</span>
+                  Download
+                </a>
+              </div>
+              <audio controls src={binaryAudioUrl} className="w-full" />
+            </div>
+          )}
           {kind === "image" && (binaryImageUrl || result?.data?.data?.[0]) && (
             <div className="mt-2">
               <div className="flex items-center justify-end mb-1.5">

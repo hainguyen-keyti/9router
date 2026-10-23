@@ -1,3 +1,13 @@
+# Unreleased
+
+## Features
+- **ElevenLabs**: sound effects (`POST /v1/audio/sound-effects`, `eleven_text_to_sound_v2`) and music (`POST /v1/audio/music`, `music_v1`/`music_v2`/`music_v2_5`) with combos and multi-account fallback; out-of-credit accounts rotate to the next one
+- **Dashboard**: Music and Sound Effects media pages with inline audio playback
+
+## Fixes
+- **Tunnel**: bind cloudflared/Tailscale to the port the server actually runs on (dev 20127 got 502 before)
+- **Tunnel**: use the trycloudflare URL directly instead of registering it with the third-party abc-tunnel.us relay
+
 # v0.5.104 (2026-10-15)
 
 ## Features

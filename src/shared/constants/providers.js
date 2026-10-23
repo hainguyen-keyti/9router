@@ -4,7 +4,7 @@ import { RISK_NOTICE } from "@/shared/constants/providersDisplay.js";
 
 const MEDIA_ENTRY_KEYS = [
   "serviceKinds", "ttsConfig", "sttConfig", "embeddingConfig",
-  "imageConfig", "imageToTextConfig", "videoConfig", "musicConfig",
+  "imageConfig", "imageToTextConfig", "videoConfig", "musicConfig", "sfxConfig",
   "searchViaChat", "searchConfig", "fetchConfig", "credentialFallback", "systemoneConfig",
   "modelsFetcher", "mediaPriority", "hiddenKinds",
 ];
@@ -81,6 +81,7 @@ export const MEDIA_PROVIDER_KINDS = [
   { id: "webFetch",    label: "Web Fetch",      icon: "language",          endpoint: { method: "POST", path: "/v1/web/fetch" } },
   { id: "video",       label: "Video",          icon: "movie",             endpoint: { method: "POST", path: "/v1/videos/generations" } },
   { id: "music",       label: "Music",          icon: "music_note",        endpoint: { method: "POST", path: "/v1/audio/music" } },
+  { id: "sfx",         label: "Sound Effects",  icon: "graphic_eq",        endpoint: { method: "POST", path: "/v1/audio/sound-effects" } },
   { id: "systemone",   label: "System One",     icon: "psychology",        endpoint: { method: "POST", path: "/v1/systemone" }, isNew: true },
 ];
 

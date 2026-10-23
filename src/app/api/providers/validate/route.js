@@ -53,7 +53,7 @@ async function probeWebProvider(provider, apiKey) {
 async function probeMediaProvider(provider, apiKey) {
   const p = AI_PROVIDERS[provider];
   if (!p) return null;
-  const MEDIA_KINDS = new Set(["tts", "embedding", "stt", "image", "video", "music", "imageToText"]);
+  const MEDIA_KINDS = new Set(["tts", "embedding", "stt", "image", "video", "music", "sfx", "imageToText"]);
   const kinds = p.serviceKinds || ["llm"];
   const isMediaOnly = kinds.every((k) => MEDIA_KINDS.has(k));
   if (!isMediaOnly) return null;

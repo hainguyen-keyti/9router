@@ -489,6 +489,30 @@ Default URLs:
   <p><i>...and 20+ more providers including Nebius, Chutes, Hyperbolic, and custom OpenAI/Anthropic compatible endpoints</i></p>
 </div>
 
+### 🔊 Sound Effects & Music
+
+Text-to-audio generation, routed like every other kind: API key, per-key access,
+combos, and fallback across multiple accounts (an out-of-credit account moves on
+to the next one).
+
+| Endpoint | Models | Params (all optional) |
+| --- | --- | --- |
+| `POST /v1/audio/sound-effects` | `el/eleven_text_to_sound_v2` | `duration_seconds` (0.5–30), `prompt_influence` (0–1), `loop` |
+| `POST /v1/audio/music` | `el/music_v2_5`, `el/music_v2`, `el/music_v1` | `music_length_ms` (3000–600000), `force_instrumental` |
+
+Both take `prompt` (or `input`) and an optional `output_format` (default
+`mp3_44100_128`). The response is the audio file; add `?response_format=json`
+to get `{ "audio": "<base64>", "format": "mp3" }` instead.
+
+```bash
+curl -X POST http://localhost:20128/v1/audio/sound-effects \
+  -H "Authorization: Bearer YOUR_KEY" -H "Content-Type: application/json" \
+  -d '{"model":"el/eleven_text_to_sound_v2","prompt":"Cinematic laser blast","duration_seconds":2.5}' \
+  --output sfx.mp3
+```
+
+> Each call spends ElevenLabs credits. Music generation may require a paid ElevenLabs plan.
+
 ### 🏠 Self-hosted Providers
 
 For speech and embeddings served from **your own** machine — whisper.cpp,

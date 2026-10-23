@@ -11,8 +11,9 @@ export {
   fetchElevenLabsVoices,
 } from "./ttsProviders/index.js";
 
-// ── Response Formatter (DRY) ───────────────────────────────────
-function createTtsResponse(base64Audio, format, responseFormat) {
+// ── Response Formatter (DRY, shared with audioGenCore) ─────────
+// `contentType` overrides the default `audio/${format}` for the binary response.
+export function createAudioResponse(base64Audio, format, responseFormat, contentType = `audio/${format}`) {
   const audioBuffer = Buffer.from(base64Audio, "base64");
 
   // JSON format: return base64 encoded audio
@@ -33,7 +34,7 @@ function createTtsResponse(base64Audio, format, responseFormat) {
     success: true,
     response: new Response(audioBuffer, {
       headers: {
-        "Content-Type": `audio/${format}`,
+        "Content-Type": contentType,
         "Content-Length": String(audioBuffer.length),
         "Access-Control-Allow-Origin": "*",
       },
@@ -60,12 +61,12 @@ export async function handleTtsCore({ provider, model, input, credentials, respo
       const result = await adapter.synthesize(input.trim(), model, credentials, responseFormat, { language, style });
       // Adapter may return a full {success, response} (legacy) or {base64, format}
       if (result.success !== undefined) return result;
-      return createTtsResponse(result.base64, result.format, responseFormat);
+      return createAudioResponse(result.base64, result.format, responseFormat);
     }
 
     // Generic config-driven (hyperbolic, deepgram, nvidia, huggingface, inworld, cartesia, playht, coqui, tortoise, qwen, ...)
     const result = await synthesizeViaConfig(provider, input.trim(), model, credentials);
-    if (result) return createTtsResponse(result.base64, result.format, responseFormat);
+    if (result) return createAudioResponse(result.base64, result.format, responseFormat);
 
     return createErrorResult(HTTP_STATUS.BAD_REQUEST, `Provider '${provider}' does not support TTS via this route.`);
   } catch (err) {
