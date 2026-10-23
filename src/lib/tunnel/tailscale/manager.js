@@ -21,7 +21,8 @@ function throwIfCancelled(token) {
   if (token.cancelled) throw new Error("tailscale cancelled");
 }
 
-export async function enableTailscale(localPort = 20128) {
+// Next's start-server sets PORT to the port it actually bound (dev: 20127); 20128 is only a fallback.
+export async function enableTailscale(localPort = Number(process.env.PORT) || 20128) {
   console.log(`[Tailscale] enable start (port=${localPort})`);
   svc.cancelToken = { cancelled: false };
   svc.activeLocalPort = localPort;
