@@ -521,6 +521,12 @@ function isDaemonTunMode() {
 
 /** Daemon process alive (independent of funnel state) — mirrors cloudflared PID check semantic. */
 export function isDaemonAlive() {
+  if (IS_WINDOWS) {
+    // Windows: tailscaled runs as a service and there is no pgrep (see startDaemonWithPassword).
+    try {
+      return /\bRUNNING\b/.test(execSync("sc query Tailscale", { encoding: "utf8", windowsHide: true, timeout: 2000 }));
+    } catch { return false; }
+  }
   return isDaemonTunMode() !== null;
 }
 

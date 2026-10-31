@@ -24,6 +24,9 @@ export default {
     headers: {
       "User-Agent": ANTIGRAVITY_IDE_USER_AGENT,
     },
+    // Headers only arrive after thinking finishes: high-tier Gemini was measured
+    // at up to ~190s, so the default 60s would kill requests that succeed.
+    timeoutMs: 300000,
     retry: {
       "429": {
         attempts: 3,

@@ -279,9 +279,22 @@ async function createBypassRequest(parsedUrl, realIP, options) {
   // CJS modules expose exports via .default in ESM dynamic import context
   const https = httpsModule.default ?? httpsModule;
   const net = netModule.default ?? netModule;
+  const { signal } = options;
+  signal?.throwIfAborted();
 
   return new Promise((resolve, reject) => {
     const socket = new net.Socket();
+    let req = null;
+
+    // Same contract as native fetch: reject with signal.reason, so callers can
+    // tell their own timeout apart from a client abort. Also tears down a body
+    // still being read, since the socket is shared with the response.
+    const onAbort = () => {
+      reject(signal.reason);
+      (req || socket).destroy(signal.reason);
+    };
+    signal?.addEventListener("abort", onAbort, { once: true });
+    socket.once("close", () => signal?.removeEventListener("abort", onAbort));
 
     socket.connect(HTTPS_PORT, realIP, () => {
       const reqOptions = {
@@ -301,7 +314,7 @@ async function createBypassRequest(parsedUrl, realIP, options) {
         },
       };
 
-      const req = https.request(reqOptions, (res) => {
+      req = https.request(reqOptions, (res) => {
         const response = {
           ok: res.statusCode >= HTTP_SUCCESS_MIN && res.statusCode < HTTP_SUCCESS_MAX,
           status: res.statusCode,
@@ -370,6 +383,7 @@ export async function proxyAwareFetch(url, options = {}, proxyOptions = null) {
       const realIP = await resolveRealIP(parsedUrl.hostname);
       if (realIP) return await createBypassRequest(parsedUrl, realIP, options);
     } catch (error) {
+      if (options.signal?.aborted) throw error;
       console.warn(`[ProxyFetch] MITM bypass failed: ${error.message}`);
     }
   }

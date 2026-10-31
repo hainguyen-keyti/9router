@@ -7,6 +7,9 @@
 ## Fixes
 - **Tunnel**: bind cloudflared/Tailscale to the port the server actually runs on (dev 20127 got 502 before)
 - **Tunnel**: use the trycloudflare URL directly instead of registering it with the third-party abc-tunnel.us relay
+- **Antigravity**: honor the abort signal on the MITM-bypass path so the connect timeout (raised to 5 min, since headers only arrive after thinking) and client aborts actually stop the upstream call
+- **Chat**: a client disconnect now cancels the upstream request before a response stream exists, and no longer cools down the account or tries the next one
+- **Tailscale**: detect the daemon on Windows via the service state (`pgrep` doesn't exist there), so the watchdog recovers only the funnel instead of a full restart
 
 # v0.5.104 (2026-10-15)
 

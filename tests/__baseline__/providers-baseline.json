@@ -31,6 +31,7 @@
     "headers": {
       "User-Agent": "antigravity/ide/2.22.0 darwin/arm64"
     },
+    "timeoutMs": 300000,
     "retry": {
       "429": {
         "attempts": 3
